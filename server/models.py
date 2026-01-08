@@ -11,10 +11,17 @@ class Mentor(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     expertise = db.Column(db.String) 
+    image = db.Column(db.String, default="")
     
     cohorts = db.relationship('Cohort', back_populates='mentor', cascade='all, delete-orphan')
     
-    serialize_rules = ('-cohorts.mentor',)
+    serialize_only = ('id', 'name', 'expertise', 'image', 'students')
+    serialize_rules = ('-cohorts',)
+
+    @property
+    def students(self):
+        """Automatically calculate student count"""
+        return len({cohort.student_id for cohort in self.cohorts})
 
     def __repr__(self):
         return f'<Mentor {self.id}, {self.name}>'
